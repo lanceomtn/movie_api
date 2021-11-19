@@ -25,7 +25,7 @@ let movies = [
   },
   {
     title: 'Argo',
-    director: 'Ben Affleck',
+    director: 'Ben',
     genre: ['Biography', 'Drama', 'Thriller'],
     year: 2012
   },
@@ -70,15 +70,64 @@ let movies = [
 //create middleware functions
 app.use(morgan('common')); //log requests to terminal
 app.use(express.static('public'));  //routes all requests for static files to files in the public folder
+app.use(express.json());
 
-//get index request/response
-app.get('/documentation', (req, res) => {
-  res.sendFile ('public/documentation.html', {root: __dirname });
+//display index(homepage) request/response
+app.get('/', (req, res) =>{
+  res.send('Welcome to My Movies!'); //respond to index route
 });
 
-//get movies request/response
+//display documentation page request/response
+app.get('/documentation', (req, res) => {
+    res.sendFile('public/documentation.html', { root: __dirname }
+    );
+});
+
+//get all movies request/response
 app.get('/movies', (req, res) =>{
-res.json(movies);
+res.status(200).json(movies)
+});
+
+//display data from movie title request/response
+app.get('/movies/:title', (req, res) => {
+    res.json(movies.find( (movie) => {
+        return movie.title === req.params.title
+    }));
+});
+
+//display data about genre by title
+app.get('/movies/:title/genre', (req, res) => {
+    res.send('Successful GET request returning data about a genre.');
+});
+
+//display data about a director by name
+app.get('/movies/director/:name', (req, res) => {
+    res.send('Successful GET request returning data about a director.');
+});
+
+//new user registration
+app.post('/users', (req, res) => {
+    res.send('Successful POST request - new user is registered');
+});
+
+//allow users to update their user info (username)
+app.put('/users/:id/info', (req, res) => {
+    res.send('Successful PUT request - user info is updated');
+});
+
+//allow users to add a movie to their list of favorites
+app.post('/users/:id/favorites', (req, res) => {
+    res.send('Successful POST request - user added a movie to their favorites');
+});
+
+//allow users to remove a movie from their list of favorites
+app.delete('/users/:id/favorites', (req, res) => {
+    res.send('Successful DELETE request - user removed movie from favorites');
+});
+
+//allow existing users to deregister
+app.delete('/users', (req, res) => {
+    res.send('Successful DELETE request - user has deregistered');
 });
 
 //create error handler
