@@ -1,123 +1,150 @@
 //require modules
 const express = require('express');
-const morgan = require('morgan');
+  morgan = require('morgan');
+  mongoose = ('mongoose');
+  bodyParser = require('body-parser');
+  Models = require('./models.js');
+
 const app = express();
 
-//create movie data
-let movies = [
-  {
-    title: 'American Beauty',
-    director: 'Sam Mendes',
-    genre: 'Drama',
-    year: 1999
-  },
-  {
-    title: 'American Hustle',
-    director: 'David Russell',
-    genre: ['Crime', 'Drama'],
-    year: 2013
-  },
-  {
-    title: 'American Pie',
-    director: 'Paul Weitz',
-    genre: 'Comedy',
-    year: 1999
-  },
-  {
-    title: 'Argo',
-    director: 'Ben',
-    genre: ['Biography', 'Drama', 'Thriller'],
-    year: 2012
-  },
-  {
-    title: 'Better Off Dead',
-    director: 'Savage Steve Holland',
-    genre: ['Comedy', 'Romance'],
-    year: 1985
-  },
-  {
-    title: 'Black Hawk Down',
-    director: 'Ridley Scott',
-    genre: ['Drama', 'History', 'War'],
-    year: 2001
-  },
-  {
-    title: 'Bull Durham',
-    director: 'Ron Shelton',
-    genre: ['Comedy', 'Romance', 'Sport'],
-    year: 1988
-  },
-  {
-    title: 'Catch Me If You Can',
-    director: 'Steven Spielberg',
-    genre: ['Biography', 'Crime', 'Drama'],
-    year: 2002
-  },
-  {
-    title: 'Charlie Wilson\'s War',
-    director: 'Mike Nichols',
-    genre: ['Biography', 'Comdedy', 'Drama'],
-    year: 2007
-  },
-  {
-    title: 'Chasing Amy',
-    director: 'Kevin Smith',
-    genre: ['Comedy', 'Drama', 'Romance'],
-    year: 1997
-  }
-];
+const Moview = Models.Movie;
+const Users = Models.User;
+
+//connect to local database
+mongoose.connect('mongodb://localhost:27017/myMoviesDB', {
+  useNewUrlParser: true, useUnifiedTopology: true });
 
 //create middleware functions
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true}));
 app.use(morgan('common')); //log requests to terminal
 app.use(express.static('public'));  //routes all requests for static files to files in the public folder
 app.use(express.json());
 
-//display index(homepage) request/response
+let auth = require('./auth')(app);
+const passport = require('passport');
+require('./passport.js');
+
+
+//display index(homepage)
 app.get('/', (req, res) =>{
-  res.send('Welcome to My Movies!'); //respond to index route
+  res.send('Welcome to My Movies!');
 });
 
-//display documentation page request/response
+//display documentation page
 app.get('/documentation', (req, res) => {
     res.sendFile('public/documentation.html', { root: __dirname }
     );
 });
 
-//get all movies request/response
+//return a list of all movies
 app.get('/movies', (req, res) =>{
 res.status(200).json(movies)
 });
 
-//display data from movie title request/response
+//return data about a single movie by title
 app.get('/movies/:title', (req, res) => {
     res.json(movies.find( (movie) => {
         return movie.title === req.params.title
     }));
 });
 
-//display data about genre by title
+//return data about a genre by genre name
 app.get('/movies/:title/genre', (req, res) => {
     res.send('Successful GET request returning data about a genre.');
 });
 
-//display data about a director by name
+//return data about a director by director name
 app.get('/movies/director/:name', (req, res) => {
     res.send('Successful GET request returning data about a director.');
 });
 
-//new user registration
+//allow new users to register
 app.post('/users', (req, res) => {
-    res.send('Successful POST request - new user is registered');
+  Users.findOne({ Username: req.body.Username })
+    .then((user) => {
+      if (user) {
+        return res.status(400).send(req.body.Username + 'already exists');
+      } else {
+        Users
+          .create({
+            Username: req.body.Username,
+            Password: req.body.Password,
+            email: req.body.email,
+            Birthday: req.body.Birthday
+          })
+          .then((user) =>{res.status(201).json(user) })
+        .catch((error) => {
+          console.error(error);
+          res.status(500).send('Error: ' + error);
+        })
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Error: ' + error);
+    });
 });
 
-//allow users to update their user info (username)
-app.put('/users/:id/info', (req, res) => {
-    res.send('Successful PUT request - user info is updated');
+//get all users
+app.get('/users', (req, res) => {
+  Users.find()
+    .then((users) => {
+      res.status(201).json(users);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
+});
+
+//get user by username
+app.get('/users/:Username', (req, res) => {
+  Users.findOne({ Username: req.params.Username })
+    .then((user) => {
+      res.json(user);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
+});
+
+//allow users to update their user info
+app.put('/users/:Username', (req, res) => {
+  Users.findOneAndUpdate({ Username: req.params.Username }, { $set:
+    {
+      Username: req.body.Username,
+      Password: req.body.Password,
+      Email: req.body.Email,
+      Birthday: req.body.Birthday
+    }
+  },
+  { new: true }, // This line makes sure that the updated document is returned
+  (err, updatedUser) => {
+    if(err) {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    } else {
+      res.json(updatedUser);
+    }
+  });
 });
 
 //allow users to add a movie to their list of favorites
-app.post('/users/:id/favorites', (req, res) => {
-    res.send('Successful POST request - user added a movie to their favorites');
+app.post('/users/:Username/movies/:MovieID', (req, res) => {
+  Users.findOneAndUpdate({ Username: req.params.Username }, {
+     $push: { FavoriteMovies: req.params.MovieID }
+   },
+   { new: true }, // This line makes sure that the updated document is returned
+  (err, updatedUser) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    } else {
+      res.json(updatedUser);
+    }
+  });
 });
 
 //allow users to remove a movie from their list of favorites
@@ -126,8 +153,19 @@ app.delete('/users/:id/favorites', (req, res) => {
 });
 
 //allow existing users to deregister
-app.delete('/users', (req, res) => {
-    res.send('Successful DELETE request - user has deregistered');
+app.delete('/users/:Username', (req, res) => {
+  Users.findOneAndRemove({ Username: req.params.Username })
+    .then((user) => {
+      if (!user) {
+        res.status(400).send(req.params.Username + ' was not found');
+      } else {
+        res.status(200).send(req.params.Username + ' was deleted.');
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
 });
 
 //create error handler
