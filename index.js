@@ -23,7 +23,7 @@ app.use(express.json());
 
 let auth = require('./auth')(app);
 const passport = require('passport');
-require('./passport.js');
+require('./passport'); //does this need .js after it - assumes it js?
 
 
 //display index(homepage)
@@ -38,19 +38,19 @@ app.get('/documentation', (req, res) => {
 });
 
 //return a list of all movies
-app.get("/movies", (req, res) => {
+app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
   Movies.find()
     .then((movies) => {
       res.status(201).json(movies);
     })
-    .catch(function (error) {
+    .catch((error) => {
       console.error(error);
-      res.status(500).send("Error: " + error);
+      res.status(500).send('Error: ' + error);
     });
 });
 
 //return data about a single movie by title
-app.get('/movies/:title', (req, res) => {
+app.get('/movies/:title', passport.authenticate('jwt', { session: false }), (req, res) => {
   Movies.findOne({ Title : req.params.title })
     .then((movie) => {
       res.json(movie);
@@ -62,7 +62,7 @@ app.get('/movies/:title', (req, res) => {
 });
 
 //return data about a genre by genre name
-app.get('/movies/genre/:name', (req, res) => {
+app.get('/movies/genre/:name', passport.authenticate('jwt', { session: false }), (req, res) => {
   Movies.find({ "Genre.Name" : req.params.name })
     .then((genre) => {
       res.json(genre);
@@ -74,7 +74,7 @@ app.get('/movies/genre/:name', (req, res) => {
 });
 
 //return data about a director by director name
-app.get('/movies/director/:name', (req, res) => {
+app.get('/movies/director/:name', passport.authenticate('jwt', { session: false }), (req, res) => {
   Movies.find({ "Director.Name" : req.params.name })
     .then((director) => {
       res.json(director);
@@ -84,6 +84,7 @@ app.get('/movies/director/:name', (req, res) => {
       res.status(500).send('Error: ' + err);
     });
 });
+
 
 //allow new users to register
 app.post('/users', (req, res) => {
@@ -158,7 +159,7 @@ app.put('/users/:ID', (req, res) => {
 });
 
 //allow users to add a movie to their list of favorites
-app.post('/users/:Username/movies/:MovieID', (req, res) => {
+app.post('/users/:Username/movies/:MovieID', passport.authenticate('jwt', { session: false }), (req, res) => {
   Users.findOneAndUpdate({ Username: req.params.Username }, {
      $push: { FavoriteMovies: req.params.MovieID }
    },
@@ -174,7 +175,7 @@ app.post('/users/:Username/movies/:MovieID', (req, res) => {
 });
 
 //allow users to remove a movie from their list of favorites
-app.delete('/users/:Username/movies/:MovieID', (req, res) => {
+app.delete('/users/:Username/movies/:MovieID', passport.authenticate('jwt', { session: false }), (req, res) => {
   Users.findOneAndUpdate({ Username: req.params.Username }, {
      $pull: { FavoriteMovies: req.params.MovieID }
    },
