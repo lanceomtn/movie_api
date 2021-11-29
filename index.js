@@ -21,10 +21,12 @@ app.use(morgan('common')); //log requests to terminal
 app.use(express.static('public'));  //routes all requests for static files to files in the public folder
 app.use(express.json());
 
-let auth = require('./auth')(app);
 const passport = require('passport');
-require('./passport'); //does this need .js after it - assumes it js?
+require('./passport');
 
+app.use(passport.initialize());
+
+const auth = require('./auth')(app);
 
 //display index(homepage)
 app.get('/', (req, res) =>{
