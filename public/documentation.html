@@ -38,44 +38,50 @@
               <tr>
                   <td>Return data about a genre</td>
                   <td>GET</td>
-                  <td>'/movies/:genre'</td>
+                  <td>'/movies/genre/:name'</td>
                   <td>Returns an array of all JSON movie objects with the genre by movie name as well as genre description</td>
               </tr>
               <tr>
                   <td>Return data about a director</td>
                   <td>GET</td>
-                  <td>'/movies/:directorName'</td>
+                  <td>'/movies/director/:name'</td>
                   <td>Returns an array of all JSON movie objects with the director by movie name as well as bio of director</td>
               </tr>
               <tr>
                 <td>New User</td>
                 <td>POST</td>
-                <td>/newUser</td>
+                <td>/users</td>
                 <td>Allow new users to register.</td>
+              </tr>
+              <tr>
+                  <td>User Login</td>
+                  <td>POST</td>
+                  <td>'/login</td>
+                  <td>Allow returning users to login</td>
               </tr>
               <tr>
                   <td>Allow users to update their user info</td>
                   <td>PUT</td>
-                  <td>'/users/:username'</td>
+                  <td>'/users/:ID'</td>
                   <td>Returns the data fields that was updated by the user</td>
               </tr>
               <tr>
                   <td>Allow users to add a movie to their list of favorites</td>
                   <td>PUT</td>
-                  <td>'/users/add/:movieName'</td>
-                  <td>Returns a text confirming the movie was added successfully</td>
+                  <td>'/users/:Username/movies/:MovieID'</td>
+                  <td>Returns text confirming the movie was added successfully</td>
               </tr>
               <tr>
                   <td>Allow users to remove a movie to their list of favorites</td>
                   <td>DELETE</td>
-                  <td>'/users/remove/:movieName'</td>
-                  <td>Returns a text confirming which movie was removed successfully</td>
+                  <td>'/users/:Username/movies/:MovieID'</td>
+                  <td>Returns text confirming which movie was removed successfully</td>
               </tr>
               <tr>
                   <td>Allow existing users to deregister</td>
                   <td>DELETE</td>
-                  <td>'/users/deleteAccount'</td>
-                  <td>Returns a text confirming that the user was reregistered</td>
+                  <td>'/users/:Username'</td>
+                  <td>Returns text confirming that the user was reregistered</td>
               </tr>
           </tbody>
       </table>
