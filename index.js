@@ -13,7 +13,11 @@ const Movies = Models.Movie;
 const Users = Models.User;
 
 //connect to local database
-mongoose.connect('mongodb://localhost:27017/myMoviesDB', {
+//mongoose.connect('mongodb://localhost:27017/myMoviesDB', {
+  //useNewUrlParser: true, useUnifiedTopology: true });
+
+//connect to online database
+mongoose.connect(process.env.CONNECTION_URI, {
   useNewUrlParser: true, useUnifiedTopology: true });
 
 //create middleware functions
