@@ -176,7 +176,7 @@ app.get('/users/:Username', (req, res) => {
 });
 
 //allow users to update a userinfo by username
-app.put('/users/:ID', (req, res) => {
+app.put('/users/:ID', passport.authenticate('jwt', { session: false }), (req, res) => {
   Users.findOneAndUpdate({ id: req.params.id }, { $set:
     {
       Username: req.body.Username,
@@ -229,7 +229,7 @@ app.delete('/users/:Username/movies/:MovieID', passport.authenticate('jwt', { se
 });
 
 //allow existing users to deregister
-app.delete('/users/:Username', (req, res) => {
+app.delete('/users/:Username', passport.authenticate('jwt', { session: false }), (req, res) => {
   Users.findOneAndRemove({ Username: req.params.Username })
     .then((user) => {
       if (!user) {
