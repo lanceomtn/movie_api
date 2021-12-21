@@ -89,7 +89,7 @@ app.get('/movies/genres/:name', passport.authenticate('jwt', { session: false })
 });
 
 //return data about a director by director name
-app.get('/movies/director/:name', function (req, res) {
+app.get('/movies/directors/:name', function (req, res) {
   Movies.find({ "Director.Name" : req.params.name })
     .then((director) => {
       res.json(director);
