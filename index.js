@@ -77,7 +77,7 @@ app.get('/movies/:title', function (req, res) {
 });
 
 //return data about a genre by genre name
-app.get('/movies/genres/:name', passport.authenticate('jwt', { session: false }), (req, res) => {
+app.get('/movies/genres/:name', function (req, res) {
   Movies.find({ "Genre.Name" : req.params.name })
     .then((genre) => {
       res.json(genre);
